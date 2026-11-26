@@ -1,0 +1,39 @@
+---
+import EntryRow from '../../components/EntryRow.astro';
+import { SECTIONS } from '../../consts';
+import Base from '../../layouts/Base.astro';
+import { getNotes, noteDate } from '../../lib/content';
+
+const entries = await getNotes();
+---
+
+<Base title="Notes" description={SECTIONS.notes.blurb} section="notes">
+	<div class="wrap">
+		<header class="page-head">
+			<p class="label sec">02 Notes</p>
+			<h1>Notes</h1>
+			<p class="lede">{SECTIONS.notes.blurb} 날짜는 마지막으로 고친 날입니다.</p>
+		</header>
+		<hr class="rule" />
+		{
+			entries.length > 0 ? (
+				<ul class="entries">
+					{entries.map((entry) => (
+						<EntryRow
+							section="notes"
+							path={`/notes/${entry.id}/`}
+							title={entry.data.title}
+							description={entry.data.description}
+							date={noteDate(entry)}
+							draft={entry.data.draft}
+						>
+							{entry.data.tags.map((tag) => <span class="meta">#{tag}</span>)}
+						</EntryRow>
+					))}
+				</ul>
+			) : (
+				<p class="empty">첫 노트를 준비하고 있습니다.</p>
+			)
+		}
+	</div>
+</Base>

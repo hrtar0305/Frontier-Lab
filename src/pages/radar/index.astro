@@ -1,0 +1,61 @@
+---
+import EntryRow from '../../components/EntryRow.astro';
+import { SECTIONS, VERDICT_LABEL, VERDICT_PENDING } from '../../consts';
+import Base from '../../layouts/Base.astro';
+import { getRadar } from '../../lib/content';
+
+const entries = await getRadar();
+const verdicts = ['try', 'watch', 'skip'] as const;
+---
+
+<Base title="Radar" description={SECTIONS.radar.blurb} section="radar">
+	<div class="wrap">
+		<header class="page-head">
+			<p class="label sec">01 Radar</p>
+			<h1>Radar</h1>
+			<p class="lede">
+				{SECTIONS.radar.blurb} 항목마다 원문 링크를 달고, "써 본다"로 판정한 것은 Lab 에서 실제로 돌려
+				봅니다.
+			</p>
+		</header>
+		<hr class="rule" />
+		{
+			entries.length > 0 ? (
+				<ul class="entries">
+					{entries.map((entry) => {
+						const pending = entry.data.items.filter((item) => !item.verdict).length;
+						return (
+							<EntryRow
+								section="radar"
+								path={`/radar/${entry.id}/`}
+								title={entry.data.title}
+								description={entry.data.description}
+								date={entry.data.date}
+								draft={entry.data.draft}
+							>
+								<span class="meta">{entry.data.items.length}건</span>
+								{verdicts.map((verdict) => {
+									const n = entry.data.items.filter((item) => item.verdict === verdict).length;
+									return (
+										n > 0 && (
+											<span class:list={['badge', verdict]}>
+												{VERDICT_LABEL[verdict]} {n}
+											</span>
+										)
+									);
+								})}
+								{pending > 0 && (
+									<span class="badge pending">
+										{VERDICT_PENDING} {pending}
+									</span>
+								)}
+							</EntryRow>
+						);
+					})}
+				</ul>
+			) : (
+				<p class="empty">첫 Radar 를 준비하고 있습니다.</p>
+			)
+		}
+	</div>
+</Base>

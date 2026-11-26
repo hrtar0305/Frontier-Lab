@@ -1,0 +1,38 @@
+name: Deploy to GitHub Pages
+
+on:
+  # main 에 푸시할 때마다 배포한다.
+  push:
+    branches: [main]
+  # Actions 탭에서 수동으로도 실행할 수 있다.
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# 배포가 겹치면 앞선 실행은 끝까지 두고, 대기 중인 것만 최신으로 바꾼다.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+      - name: Install, build, and upload the site
+        uses: withastro/action@v6
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5

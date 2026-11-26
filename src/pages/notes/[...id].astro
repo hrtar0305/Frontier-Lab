@@ -1,0 +1,61 @@
+---
+import { type CollectionEntry, render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import { getNotes } from '../../lib/content';
+import { formatDate, isoDate } from '../../lib/format';
+import { href } from '../../lib/url';
+
+export async function getStaticPaths() {
+	const entries = await getNotes();
+	return entries.map((entry) => ({ params: { id: entry.id }, props: { entry } }));
+}
+
+interface Props {
+	entry: CollectionEntry<'notes'>;
+}
+
+const { entry } = Astro.props;
+const { data } = entry;
+const { Content } = await render(entry);
+---
+
+<Base title={data.title} description={data.description} section="notes">
+	<article class="wrap narrow">
+		<header class="page-head">
+			<div class="row">
+				<a class="label sec" href={href('/notes/')}>Notes</a>
+				<span class="meta">
+					처음 쓴 날 <time datetime={isoDate(data.created)}>{formatDate(data.created)}</time>
+					{
+						data.updated && (
+							<>
+								· 고친 날 <time datetime={isoDate(data.updated)}>{formatDate(data.updated)}</time>
+							</>
+						)
+					}
+				</span>
+				{data.draft && <span class="badge draft pending">초안 · 배포에서는 숨김</span>}
+			</div>
+			<h1>{data.title}</h1>
+			<p class="lede">{data.description}</p>
+			{
+				data.tags.length > 0 && (
+					<ul class="tags row">
+						{data.tags.map((tag) => (
+							<li class="meta">#{tag}</li>
+						))}
+					</ul>
+				)
+			}
+		</header>
+		<hr class="rule" />
+
+		<div class="prose" style="margin-top: 36px">
+			<Content />
+		</div>
+
+		<footer class="post-foot">
+			<a href={href('/notes/')}>← Notes 목록</a>
+		</footer>
+	</article>
+</Base>

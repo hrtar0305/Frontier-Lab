@@ -1,0 +1,66 @@
+---
+import { AUTHOR, GITHUB_URL, REPO_URL, SECTION_ORDER, SECTIONS } from '../consts';
+import Base from '../layouts/Base.astro';
+import { href } from '../lib/url';
+---
+
+<Base
+	title="About"
+	description="Frontier-Lab 이 무엇이고 어떤 원칙으로 운영되는지 소개합니다."
+	section="about"
+>
+	<article class="wrap narrow">
+		<header class="page-head">
+			<p class="label">About</p>
+			<h1>Frontier-Lab 소개</h1>
+			<p class="lede">
+				AI 분야에서 새로 나오는 기술을 따라가며 공부하고, 직접 써 본 결과를 쌓아 가는 개인 사이트입니다.
+			</p>
+		</header>
+		<hr class="rule" />
+
+		<div class="prose" style="margin-top: 36px">
+			<h2>무엇을 하는 곳인가</h2>
+			<p>
+				이름 그대로 두 가지를 합니다. 최전선(frontier)에서 무슨 일이 일어나는지 따라가고, 실험실(lab)처럼
+				직접 돌려 봅니다. 공부를 위한 기록이지만 다른 사람이 읽어도 쓸모가 있도록 공개합니다.
+			</p>
+			<ul>
+				{
+					SECTION_ORDER.map((key) => (
+						<li>
+							<a href={href(SECTIONS[key].path)}>
+								<strong>{SECTIONS[key].label}</strong>
+							</a>{' '}
+							— {SECTIONS[key].blurb}
+						</li>
+					))
+				}
+			</ul>
+			<p>
+				세 구역은 한 흐름으로 이어집니다. Radar 에서 눈에 띈 것을 Notes 로 이해하고, Lab 에서 직접
+				확인합니다.
+			</p>
+
+			<h2>운영 원칙</h2>
+			<ul>
+				<li><strong>출처를 단다.</strong> Radar 의 모든 항목은 원문으로 연결됩니다.</li>
+				<li>
+					<strong>날짜와 버전을 적는다.</strong> 이 분야의 글은 빨리 낡습니다. 언제, 어떤 버전으로 확인한
+					내용인지 남깁니다.
+				</li>
+				<li><strong>안 된 것도 남긴다.</strong> 실패한 실험과 틀렸던 예상도 기록입니다.</li>
+				<li>
+					<strong>해 본 것과 읽은 것을 구분한다.</strong> 직접 확인하지 않은 내용을 해 본 것처럼 쓰지
+					않습니다.
+				</li>
+			</ul>
+
+			<h2>만든 사람</h2>
+			<p>
+				<a href={GITHUB_URL}>{AUTHOR}</a> 가 운영합니다. 사이트 소스와 실험 코드는
+				<a href={REPO_URL}>GitHub 리포지토리</a> 에 모두 공개되어 있습니다.
+			</p>
+		</div>
+	</article>
+</Base>

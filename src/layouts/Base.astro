@@ -1,0 +1,97 @@
+---
+import '../styles/global.css';
+import {
+	AUTHOR,
+	GITHUB_URL,
+	REPO_URL,
+	SECTION_ORDER,
+	SECTIONS,
+	SITE_DESCRIPTION,
+	SITE_TAGLINE,
+	SITE_TITLE,
+} from '../consts';
+import { href } from '../lib/url';
+
+interface Props {
+	title?: string;
+	description?: string;
+	// 현재 페이지가 속한 구역. 메뉴 강조와 구역 색에 쓰인다.
+	section?: 'radar' | 'notes' | 'lab' | 'about';
+}
+
+const { title, description = SITE_DESCRIPTION, section } = Astro.props;
+const pageTitle = title ? `${title} · ${SITE_TITLE}` : `${SITE_TITLE} — ${SITE_TAGLINE}`;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+const nav = [
+	...SECTION_ORDER.map((key) => ({ key, label: SECTIONS[key].label, path: SECTIONS[key].path })),
+	{ key: 'about', label: 'About', path: '/about/' },
+];
+---
+
+<!doctype html>
+<html lang="ko">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<link rel="icon" type="image/svg+xml" href={href('/favicon.svg')} />
+		<link rel="canonical" href={canonical} />
+		<title>{pageTitle}</title>
+		<meta name="description" content={description} />
+		<meta name="author" content={AUTHOR} />
+		<meta property="og:type" content="website" />
+		<meta property="og:site_name" content={SITE_TITLE} />
+		<meta property="og:title" content={title ?? SITE_TITLE} />
+		<meta property="og:description" content={description} />
+		<meta property="og:url" content={canonical} />
+		<meta name="generator" content={Astro.generator} />
+		<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+		<link
+			rel="stylesheet"
+			href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"
+		/>
+	</head>
+	<body data-section={section && section !== 'about' ? section : undefined}>
+		<a class="skip" href="#main">본문으로 건너뛰기</a>
+		<header class="site-header">
+			<div class="wrap bar">
+				<a class="wordmark" href={href('/')}>
+					<svg
+						viewBox="0 0 24 24"
+						width="20"
+						height="20"
+						fill="none"
+						stroke="currentColor"
+						stroke-width="2.2"
+						stroke-linecap="round"
+						aria-hidden="true"
+					>
+						<path d="M3 19a16 16 0 0 1 16-16"></path>
+						<path d="M9.5 19a9.5 9.5 0 0 1 9.5-9.5"></path>
+						<circle cx="19" cy="19" r="2.4" fill="currentColor" stroke="none"></circle>
+					</svg>
+					{SITE_TITLE}
+				</a>
+				<nav class="site-nav" aria-label="주 메뉴">
+					{
+						nav.map((item) => (
+							<a href={href(item.path)} aria-current={section === item.key ? 'page' : undefined}>
+								{item.label}
+							</a>
+						))
+					}
+				</nav>
+			</div>
+		</header>
+
+		<main id="main">
+			<slot />
+		</main>
+
+		<footer class="site-footer">
+			<div class="wrap bar">
+				<span>© {new Date().getFullYear()} <a href={GITHUB_URL}>{AUTHOR}</a></span>
+				<span><a href={REPO_URL}>GitHub에서 소스 보기</a></span>
+			</div>
+		</footer>
+	</body>
+</html>

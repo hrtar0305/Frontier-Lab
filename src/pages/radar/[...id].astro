@@ -1,0 +1,98 @@
+---
+import { type CollectionEntry, render } from 'astro:content';
+import { KIND_LABEL, VERDICT_LABEL, VERDICT_PENDING } from '../../consts';
+import Base from '../../layouts/Base.astro';
+import { getLab, getRadar } from '../../lib/content';
+import { formatDate, isoDate } from '../../lib/format';
+import { href } from '../../lib/url';
+
+export async function getStaticPaths() {
+	const entries = await getRadar();
+	return entries.map((entry) => ({ params: { id: entry.id }, props: { entry } }));
+}
+
+interface Props {
+	entry: CollectionEntry<'radar'>;
+}
+
+const { entry } = Astro.props;
+const { data } = entry;
+const { Content } = await render(entry);
+const hasBody = Boolean(entry.body?.trim());
+
+// 항목이 가리키는 Lab 글이 실제로 (보이는 상태로) 있을 때만 링크를 건다.
+const labTitles = new Map((await getLab()).map((lab) => [lab.id, lab.data.title]));
+---
+
+<Base title={data.title} description={data.description} section="radar">
+	<article class="wrap narrow">
+		<header class="page-head">
+			<div class="row">
+				<a class="label sec" href={href('/radar/')}>Radar</a>
+				<time class="meta" datetime={isoDate(data.date)}>{formatDate(data.date)}</time>
+				{data.draft && <span class="badge draft pending">초안 · 배포에서는 숨김</span>}
+			</div>
+			<h1>{data.title}</h1>
+			<p class="lede">{data.description}</p>
+			<div class="row">
+				<span class="meta">
+					다룬 기간 {formatDate(data.period.from)} – {formatDate(data.period.to)} · {
+						data.items.length
+					}건
+				</span>
+			</div>
+		</header>
+		<hr class="rule" />
+
+		<ol class="radar-items">
+			{
+				data.items.map((item) => {
+					const labTitle = item.lab ? labTitles.get(item.lab) : undefined;
+					return (
+						<li class="radar-item">
+							<div class="top">
+								<span class="label">
+									{KIND_LABEL[item.kind]}
+									{item.date && ` · ${formatDate(item.date)}`}
+								</span>
+								<span class:list={['badge', item.verdict ?? 'pending']}>
+									{item.verdict ? VERDICT_LABEL[item.verdict] : VERDICT_PENDING}
+								</span>
+							</div>
+							<h3>
+								<a href={item.url} rel="noopener">
+									{item.name}
+									<span aria-hidden="true">↗</span>
+								</a>
+							</h3>
+							<p class="summary">{item.summary}</p>
+							{(item.why || labTitle) && (
+								<p class="why">
+									{item.why}
+									{labTitle && (
+										<>
+											{' '}
+											<a href={href(`/lab/${item.lab}/`)}>→ Lab: {labTitle}</a>
+										</>
+									)}
+								</p>
+							)}
+						</li>
+					);
+				})
+			}
+		</ol>
+
+		{
+			hasBody && (
+				<div class="prose" style="margin-top: 48px">
+					<Content />
+				</div>
+			)
+		}
+
+		<footer class="post-foot">
+			<a href={href('/radar/')}>← Radar 목록</a>
+		</footer>
+	</article>
+</Base>

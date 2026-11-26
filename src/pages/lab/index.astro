@@ -1,0 +1,42 @@
+---
+import EntryRow from '../../components/EntryRow.astro';
+import { SECTIONS, STATUS_LABEL } from '../../consts';
+import Base from '../../layouts/Base.astro';
+import { getLab } from '../../lib/content';
+
+const entries = await getLab();
+---
+
+<Base title="Lab" description={SECTIONS.lab.blurb} section="lab">
+	<div class="wrap">
+		<header class="page-head">
+			<p class="label sec">03 Lab</p>
+			<h1>Lab</h1>
+			<p class="lede">{SECTIONS.lab.blurb} 잘 안 된 실험도 그대로 둡니다.</p>
+		</header>
+		<hr class="rule" />
+		{
+			entries.length > 0 ? (
+				<ul class="entries">
+					{entries.map((entry) => (
+						<EntryRow
+							section="lab"
+							path={`/lab/${entry.id}/`}
+							title={entry.data.title}
+							description={entry.data.description}
+							date={entry.data.date}
+							draft={entry.data.draft}
+						>
+							<span class:list={['badge', entry.data.status]}>
+								{STATUS_LABEL[entry.data.status]}
+							</span>
+							{entry.data.tags.map((tag) => <span class="meta">#{tag}</span>)}
+						</EntryRow>
+					))}
+				</ul>
+			) : (
+				<p class="empty">첫 실험 기록을 준비하고 있습니다.</p>
+			)
+		}
+	</div>
+</Base>

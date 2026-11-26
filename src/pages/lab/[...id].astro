@@ -1,0 +1,92 @@
+---
+import { type CollectionEntry, render } from 'astro:content';
+import { REPO_URL, STATUS_LABEL } from '../../consts';
+import Base from '../../layouts/Base.astro';
+import { getLab } from '../../lib/content';
+import { formatDate, isoDate } from '../../lib/format';
+import { href } from '../../lib/url';
+
+export async function getStaticPaths() {
+	const entries = await getLab();
+	return entries.map((entry) => ({ params: { id: entry.id }, props: { entry } }));
+}
+
+interface Props {
+	entry: CollectionEntry<'lab'>;
+}
+
+const { entry } = Astro.props;
+const { data } = entry;
+const { Content } = await render(entry);
+---
+
+<Base title={data.title} description={data.description} section="lab">
+	<article class="wrap narrow">
+		<header class="page-head">
+			<div class="row">
+				<a class="label sec" href={href('/lab/')}>Lab</a>
+				<time class="meta" datetime={isoDate(data.date)}>{formatDate(data.date)}</time>
+				<span class:list={['badge', data.status]}>{STATUS_LABEL[data.status]}</span>
+				{data.draft && <span class="badge draft pending">초안 · 배포에서는 숨김</span>}
+			</div>
+			<h1>{data.title}</h1>
+			<p class="lede">{data.description}</p>
+			{
+				data.tags.length > 0 && (
+					<ul class="tags row">
+						{data.tags.map((tag) => (
+							<li class="meta">#{tag}</li>
+						))}
+					</ul>
+				)
+			}
+		</header>
+
+		<dl class="brief">
+			<div>
+				<dt class="label sec">질문</dt>
+				<dd class="question">{data.question}</dd>
+			</div>
+			{
+				data.takeaway && (
+					<div>
+						<dt class="label sec">결과</dt>
+						<dd>{data.takeaway}</dd>
+					</div>
+				)
+			}
+			{
+				data.env.length > 0 && (
+					<div>
+						<dt class="label sec">환경</dt>
+						<dd>
+							<ul class="chips">
+								{data.env.map((tool) => (
+									<li>{tool}</li>
+								))}
+							</ul>
+						</dd>
+					</div>
+				)
+			}
+			{
+				data.code && (
+					<div>
+						<dt class="label sec">코드</dt>
+						<dd>
+							<a href={`${REPO_URL}/tree/main/${data.code}`}>{data.code}</a>
+						</dd>
+					</div>
+				)
+			}
+		</dl>
+
+		<div class="prose">
+			<Content />
+		</div>
+
+		<footer class="post-foot">
+			<a href={href('/lab/')}>← Lab 목록</a>
+		</footer>
+	</article>
+</Base>

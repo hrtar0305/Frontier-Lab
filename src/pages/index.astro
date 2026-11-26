@@ -1,0 +1,58 @@
+---
+import EntryRow from '../components/EntryRow.astro';
+import { SECTION_ORDER, SECTIONS } from '../consts';
+import Base from '../layouts/Base.astro';
+import { getFeed } from '../lib/content';
+import { href } from '../lib/url';
+
+const feed = await getFeed();
+const counts = Object.fromEntries(
+	SECTION_ORDER.map((key) => [key, feed.filter((item) => item.section === key).length]),
+);
+---
+
+<Base>
+	<section class="hero">
+		<div class="wrap">
+			<p class="label">AI Frontier · Hands-on Lab</p>
+			<h1>읽은 것을 직접 돌려 보고,<br />결과를 남깁니다.</h1>
+			<p class="lede">
+				AI 쪽에서 새로 나오는 것들을 따라가되 요약에서 멈추지 않습니다. 눈에 띈 것을 정리하고, 이해한
+				만큼 내 말로 적고, 직접 써 본 결과를 기록으로 쌓습니다.
+			</p>
+		</div>
+	</section>
+
+	<div class="wrap">
+		<ol class="flow">
+			{
+				SECTION_ORDER.map((key, i) => (
+					<li data-section={key}>
+						<a href={href(SECTIONS[key].path)}>
+							<span class="label sec">
+								0{i + 1} · {SECTIONS[key].step}
+							</span>
+							<h2>{SECTIONS[key].label}</h2>
+							<p>{SECTIONS[key].blurb}</p>
+							<span class="meta count">{counts[key]}편</span>
+						</a>
+					</li>
+				))
+			}
+		</ol>
+
+		<div class="section-title">
+			<h2>최근 글</h2>
+			<span class="meta">{feed.length}편</span>
+		</div>
+		{
+			feed.length > 0 ? (
+				<ul class="entries">
+					{feed.slice(0, 12).map((item) => <EntryRow {...item} showSection />)}
+				</ul>
+			) : (
+				<p class="empty">아직 올라온 글이 없습니다.</p>
+			)
+		}
+	</div>
+</Base>

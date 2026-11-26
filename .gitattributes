@@ -1,0 +1,2 @@
+# 줄바꿈은 저장소에 LF 로 통일한다 (Windows 에서 작업해도 CRLF 가 섞이지 않게)
+* text=auto eol=lf
